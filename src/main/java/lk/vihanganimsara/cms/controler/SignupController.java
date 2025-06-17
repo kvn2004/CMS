@@ -32,24 +32,42 @@ public class SignupController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> users = mapper.readValue(req.getInputStream(), Map.class);
-        String username = users.get("username");
-        String password = users.get("password");
-        String email = users.get("email");
-        String role = users.get("role");
-        resp.setContentType("application/json");
-        UserDto userDto = new UserDto(username, password, email, role);
-        boolean isDone = signupModel.userSignup(userDto ,dataSource);
-        // Prepare response
-        try (PrintWriter out = resp.getWriter()) {
-            if (isDone) {
-                out.write("{\"status\": \"success\", \"message\": \"User registered successfully.\"}");
-                resp.setStatus(HttpServletResponse.SC_OK); // 200
-            } else {
-                out.write("{\"status\": \"error\", \"message\": \"Failed to register user.\"}");
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // 500
-            }
+//        ObjectMapper mapper = new ObjectMapper();
+//        Map<String, String> users = mapper.readValue(req.getInputStream(), Map.class);
+//        String username = users.get("username");
+//        String password = users.get("password");
+//        String email = users.get("email");
+//        String role = users.get("role");
+//        resp.setContentType("application/json");
+//        UserDto userDto = new UserDto(username, password, email, role);
+//        boolean isDone = signupModel.userSignup(userDto ,dataSource);
+//        // Prepare response
+//        try (PrintWriter out = resp.getWriter()) {
+//            if (isDone) {
+//                out.write("{\"status\": \"success\", \"message\": \"User registered successfully.\"}");
+//                resp.setStatus(HttpServletResponse.SC_OK); // 200
+//            } else {
+//                out.write("{\"status\": \"error\", \"message\": \"Failed to register user.\"}");
+//                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // 500
+//            }
+//        }
+//    }
+        String username = req.getParameter("username");
+        String password = req.getParameter("password");
+        String email = req.getParameter("email");
+        String role = req.getParameter("role");
+
+        UserDto dto = new UserDto(username, password, email, role);
+        boolean result = signupModel.userSignup(dto, dataSource);
+
+        // Tell the JSP what happened
+        if (result) {
+            req.setAttribute("message", "User registered successfully!");
+        } else {
+            req.setAttribute("message", "Failed to register user.");
         }
+
+        // Show signup.jsp again with the message
+        req.getRequestDispatcher("signup.jsp").forward(req, resp);
     }
 }
