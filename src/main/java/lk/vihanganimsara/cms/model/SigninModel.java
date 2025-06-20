@@ -19,36 +19,44 @@ import java.sql.SQLException;
  **/
 
 public class SigninModel {
-    public boolean userSignin(UserDto userDto, DataSource dataSource) {
+    public UserDto userSignin(UserDto userDto, DataSource dataSource) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        boolean success = false;
+        ResultSet resultSet = null;
+        UserDto loggedInUser = null;
 
         try {
             connection = dataSource.getConnection();
             preparedStatement = connection.prepareStatement(
-                    "SELECT * FROM users WHERE email = ? AND password = ?"
+                    "SELECT id, username, email, role FROM users WHERE email = ? AND password = ?"
             );
             preparedStatement.setString(1, userDto.getEmail());
             preparedStatement.setString(2, userDto.getPassword());
 
-            ResultSet rowsAffected = preparedStatement.executeQuery();
-            System.out.println(rowsAffected);
-            success = rowsAffected.next();
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                // ✅ User found – get ID and other info
+                int id = resultSet.getInt("id");
+                String username = resultSet.getString("username");
+                String role = resultSet.getString("role");
+                String email = resultSet.getString("email");
+
+                // Create a new UserDto to return
+                loggedInUser = new UserDto(id, username, userDto.getPassword(), email, role);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("SQL Error: " + e.getMessage());
-            success = false;
         } finally {
             try {
+                if (resultSet != null) resultSet.close();
                 if (preparedStatement != null) preparedStatement.close();
                 if (connection != null) connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
-                System.out.println("Cleanup Error: " + e.getMessage());
             }
         }
-        return success;
+        return loggedInUser;
     }
+
 
 }

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <Context path="/CMS">
     <Resource
             name="jdbc/TaskDB"
@@ -6,12 +5,10 @@
             type="javax.sql.DataSource"
             initialSize="50"
             maxTotal="100"
-            maxIdle="30"
-            maxWaitMillis="10000"
+
             username="root"
             password="kvn2004"
             driverClassName="com.mysql.cj.jdbc.Driver"
-            url="jdbc:mysql://localhost:3306/cms_db?useSSL=false"
-            validationQuery="SELECT 1"
-            testOnBorrow="true" />
+            url="jdbc:mysql://localhost:3306/cms_db"
+            />
 </Context>

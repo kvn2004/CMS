@@ -57,7 +57,7 @@ public class SignupController extends HttpServlet {
         String email = req.getParameter("email");
         String role = req.getParameter("role");
 
-        UserDto dto = new UserDto(username, password, email, role);
+        UserDto dto = new UserDto(null,username, password, email, role);
         boolean result = signupModel.userSignup(dto, dataSource);
 
         // Tell the JSP what happened
