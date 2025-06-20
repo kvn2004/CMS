@@ -41,12 +41,24 @@ public class SigninController extends HttpServlet {
         userDto.setPassword(password);
 
         UserDto result = signinModel.userSignin(userDto, dataSource);
+        String role = result.getRole();
         PrintWriter out = resp.getWriter();
         if (result != null) {
             // ✅ Save to session
             HttpSession session = req.getSession();
             session.setAttribute("user", result);
-            resp.sendRedirect("addComplaint.jsp");
+            switch (role.toLowerCase()) {
+                case "admin":
+                    resp.sendRedirect("adminDash.jsp");
+                    break;
+                case "employee":
+                    resp.sendRedirect("addComplaint.jsp");
+                    break;
+                default:
+                    // fallback
+                    resp.sendRedirect("signin.jsp");
+                    break;
+            }
         } else {
             req.setAttribute("error", "Invalid credentials");
             req.getRequestDispatcher("signin.jsp").forward(req, resp);
