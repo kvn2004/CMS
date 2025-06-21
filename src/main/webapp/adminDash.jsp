@@ -6,17 +6,16 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.Map" %>
+<%@ page import="lk.vihanganimsara.cms.dto.ComplainDto" %>
+<%
+    List<ComplainDto> complaints = (List<ComplainDto>) request.getAttribute("complaints");
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -40,23 +39,25 @@
             text-align: center;
             border-radius: 10px 10px 0 0;
         }
-        .form-control, .form-select {
+        .form-select {
             background-color: #2a2a2a;
             border: 1px solid #FF014F;
             color: #ffffff;
         }
-        .form-control:focus, .form-select:focus {
+        .form-select:focus {
             background-color: #2a2a2a;
             border-color: #FF014F;
             box-shadow: 0 0 5px rgba(255, 1, 79, 0.5);
             color: #ffffff;
         }
-        .btn-primary {
-            background-color: #FF014F;
-            border: none;
+        .btn-success, .btn-danger {
+            background-color: #ffffff;
+            color: #FF014F;
+            border: 1px solid #FF014F;
         }
-        .btn-primary:hover {
-            background-color: #e60045;
+        .btn-success:hover, .btn-danger:hover {
+            background-color: #FF014F;
+            color: #ffffff;
         }
         .table {
             background-color: #ffffff;
@@ -69,24 +70,6 @@
         .table td {
             vertical-align: middle;
         }
-        .btn-success {
-            background-color: #ffffff;
-            color: #FF014F;
-            border: 1px solid #FF014F;
-        }
-        .btn-success:hover {
-            background-color: #FF014F;
-            color: #ffffff;
-        }
-        .btn-danger {
-            background-color: #ffffff;
-            color: #FF014F;
-            border: 1px solid #FF014F;
-        }
-        .btn-danger:hover {
-            background-color: #FF014F;
-            color: #ffffff;
-        }
     </style>
 </head>
 <body>
@@ -96,7 +79,6 @@
             <h3>Admin Dashboard</h3>
         </div>
         <div class="card-body">
-            <!-- Complaint Management Section -->
             <h4 class="mb-3" style="color: #FF014F;">Complaint Management</h4>
             <table class="table table-striped">
                 <thead>
@@ -105,31 +87,38 @@
                     <th>Title</th>
                     <th>Description</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <%
-                    // Sample complaint data - replace with actual data from database
-                    List<Map<String, String>> complaints = new ArrayList<>();
-                    complaints.add(new HashMap<String, String>() {{ put("id", "1"); put("title", "Issue 1"); put("description", "First issue description"); put("status", "Pending"); }});
-                    complaints.add(new HashMap<String, String>() {{ put("id", "2"); put("title", "Issue 2"); put("description", "Second issue description"); put("status", "Resolved"); }});
-                    complaints.add(new HashMap<String, String>() {{ put("id", "3"); put("title", "Issue 3"); put("description", "Third issue description"); put("status", "Pending"); }});
-                    for (Map<String, String> complaint : complaints) {
-                %>
+                <% if (complaints != null && !complaints.isEmpty()) {
+                    for (ComplainDto complaint : complaints) { %>
                 <tr>
-                    <td><%= complaint.get("id") %></td>
-                    <td><%= complaint.get("title") %></td>
-                    <td><%= complaint.get("description") %></td>
+                    <td><%= complaint.getId() %></td>
+                    <td><%= complaint.getTitle() %></td>
+                    <td><%= complaint.getDescription() %></td>
                     <td>
-                        <select class="form-select" name="status_<%= complaint.get("id") %>" onchange="updateStatus('<%= complaint.get("id") %>', this.value)">
-                            <option value="Pending" <%= "Pending".equals(complaint.get("status")) ? "selected" : "" %>>Pending</option>
-                            <option value="Resolved" <%= "Resolved".equals(complaint.get("status")) ? "selected" : "" %>>Resolved</option>
-                        </select>
+                        <form action="adminDashboard" method="post" style="display: inline-block;">
+                            <input type="hidden" name="mode" value="update" />
+                            <input type="hidden" name="id" value="<%= complaint.getId() %>" />
+                            <select class="form-select form-select-sm" name="status" onchange="this.form.submit()">
+                                <option value="Pending" <%= "Pending".equalsIgnoreCase(complaint.getStatus()) ? "selected" : "" %>>Pending</option>
+                                <option value="Resolved" <%= "Resolved".equalsIgnoreCase(complaint.getStatus()) ? "selected" : "" %>>Resolved</option>
+                            </select>
+                        </form>
                     </td>
                     <td>
-                        <a href="deleteComplaint?id=<%= complaint.get("id") %>" class="btn btn-danger btn-sm">Delete</a>
+                        <form action="adminDashboard" method="post" style="display:inline;">
+                            <input type="hidden" name="mode" value="delete" />
+                            <input type="hidden" name="id" value="<%= complaint.getId() %>" />
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
                     </td>
+                </tr>
+                <%  }
+                } else { %>
+                <tr>
+                    <td colspan="5" class="text-center">No complaints found.</td>
                 </tr>
                 <% } %>
                 </tbody>
@@ -138,7 +127,7 @@
     </div>
 </div>
 
-<!-- Bootstrap -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
